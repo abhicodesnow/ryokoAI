@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,4 +14,47 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+  
+  // A User can have many Trips
+  trips     Trip[]   
+}
+
+model Trip {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  destination String
+  budget      String
+  days        Int
+  interests   String[]
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itineraries    Itinerary[]
+  savedLocations SavedLocation[]
+}
+
+model Itinerary {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  tripId      String   @db.ObjectId
+  day         Int
+  activities  String[]
+  restaurants String[]
+  hotel       String?
+  notes       String?
+
+  // Relation
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model SavedLocation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  tripId      String   @db.ObjectId
+  location    String
+  latitude    Float
+  longitude   Float
+  category    String
+
+  // Relation
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }
